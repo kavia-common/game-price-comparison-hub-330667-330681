@@ -3,28 +3,35 @@
  *
  * Communicates with the compare-prices backend.
  *
- * URL resolution strategy:
- *   - In development, requests use relative paths (e.g. "/compare-prices")
- *     which are proxied by the Vite dev server to the backend. This avoids
- *     CORS and self-signed certificate issues entirely.
- *   - When VITE_API_URL is explicitly set, that absolute URL is used
- *     (intended for production builds where the proxy is not available).
+ * URL resolution strategy (checked in order):
+ *   1. VITE_API_URL      — explicit backend URL
+ *   2. VITE_BACKEND_URL  — alternative backend URL variable
+ *   3. VITE_API_BASE     — another alternative variable
+ *   4. Empty string      — relative paths through Vite dev-server proxy
  *
- * Environment variable checked:
- *   1. VITE_API_URL — explicit backend URL (only used when set)
+ * When an explicit backend URL is provided, the client calls the backend
+ * directly (cross-origin). The backend must have the correct CORS headers
+ * for this to work.
  *
- * When no explicit URL is provided, an empty base is used so that all
- * requests become relative and go through the Vite dev-server proxy.
+ * When no explicit URL is provided, all requests become relative and go
+ * through the Vite dev-server proxy (suitable for local development).
+ *
+ * Environment variables:
+ *   - VITE_API_URL       — preferred backend URL
+ *   - VITE_BACKEND_URL   — fallback backend URL
+ *   - VITE_API_BASE      — second fallback backend URL
  */
 
-// Only use an explicit URL when VITE_API_URL is set.
-// VITE_BACKEND_URL and VITE_API_BASE in .env point to the HTTPS backend
-// which may have certificate issues from the browser; the Vite proxy
-// (configured in vite.config.js) is the preferred path in development.
-const explicitUrl = import.meta.env.VITE_API_URL || '';
+// Resolve the backend URL from available environment variables.
+// The .env file may set VITE_BACKEND_URL / VITE_API_BASE but not VITE_API_URL.
+const resolvedUrl =
+  import.meta.env.VITE_API_URL ||
+  import.meta.env.VITE_BACKEND_URL ||
+  import.meta.env.VITE_API_BASE ||
+  '';
 
 // Strip trailing slashes for consistent path joining.
-const API_BASE_URL = explicitUrl.replace(/\/+$/, '');
+const API_BASE_URL = resolvedUrl.replace(/\/+$/, '');
 
 /**
  * Builds a full request URL for an API path.
@@ -41,7 +48,7 @@ function buildUrl(path, params = {}) {
     const searchParams = new URLSearchParams(params).toString();
     return searchParams ? `${path}?${searchParams}` : path;
   }
-  // Absolute URL for production / explicit env configuration
+  // Absolute URL for hosted preview / production
   const url = new URL(path, API_BASE_URL);
   Object.entries(params).forEach(([key, value]) => {
     url.searchParams.set(key, value);
@@ -70,8 +77,8 @@ function fetchWithTimeout(url, options = {}, timeout = 30000) {
  * Compares game prices across stores.
  *
  * Sends a GET request to /compare-prices with the specified query and category.
- * In development, the request is proxied through the Vite dev server to
- * the backend on port 3001.
+ * When a backend URL is configured, calls the backend directly (cross-origin).
+ * Otherwise, the request goes through the Vite dev-server proxy.
  *
  * @param {string} query - The game name or search query.
  * @param {string} category - 'new', 'preowned', or 'all'.
