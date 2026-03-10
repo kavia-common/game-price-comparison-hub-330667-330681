@@ -16,6 +16,7 @@ export default [
       ".vscode/",
       ".idea/",
       "*.config.mjs",
+      "*.config.js",
     ],
   },
   {
@@ -37,6 +38,18 @@ export default [
     languageOptions: {
       globals: {
         document: "readonly",
+        window: "readonly",
+        console: "readonly",
+        fetch: "readonly",
+        setTimeout: "readonly",
+        clearTimeout: "readonly",
+        setInterval: "readonly",
+        clearInterval: "readonly",
+        URL: "readonly",
+        URLSearchParams: "readonly",
+        Promise: "readonly",
+        HTMLElement: "readonly",
+        navigator: "readonly",
       },
     },
   },

@@ -1,0 +1,76 @@
+/* ========================================
+   PriceHunt – Cyberpunk Theme Globals
+   Tailwind CSS v3 directives
+   ======================================== */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base layer resets */
+@layer base {
+  body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #0a0a1a 0%, #0d0d2b 50%, #0a0a1a 100%);
+    color: #e2e8f0;
+    overflow-x: hidden;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #0d0d1a;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #00f0ff44;
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #00f0ff88;
+  }
+}
+
+/* Utility layer for custom animations */
+@layer utilities {
+  .text-glow-blue {
+    text-shadow: 0 0 10px #00f0ff88, 0 0 20px #00f0ff44;
+  }
+  .text-glow-pink {
+    text-shadow: 0 0 10px #ff2d9588, 0 0 20px #ff2d9544;
+  }
+  .box-glow-blue {
+    box-shadow: 0 0 15px #00f0ff33, 0 0 30px #00f0ff11;
+  }
+  .box-glow-pink {
+    box-shadow: 0 0 15px #ff2d9533, 0 0 30px #ff2d9511;
+  }
+
+  /* Animated background grid */
+  .cyber-grid-bg {
+    background-image:
+      linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* Scanline overlay */
+  .scanlines::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 50;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 240, 255, 0.015) 2px,
+      rgba(0, 240, 255, 0.015) 4px
+    );
+  }
+}
