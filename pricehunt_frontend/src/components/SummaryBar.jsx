@@ -30,10 +30,13 @@ export default function SummaryBar({ results, query, category }) {
     .map((item) => Number(item.price))
     .filter((p) => !isNaN(p) && p > 0);
 
-  const lowest = stats.lowest || (prices.length ? Math.min(...prices) : null);
-  const highest = stats.highest || (prices.length ? Math.max(...prices) : null);
-  const average = stats.average || (prices.length ? Math.round(prices.reduce((a, b) => a + b, 0) / prices.length) : null);
-  const storeCount = stats.storeCount || items.length;
+  const lowest = stats.lowest_price || stats.lowest || (prices.length ? Math.min(...prices) : null);
+  const highest = stats.highest_price || stats.highest || (prices.length ? Math.max(...prices) : null);
+  const average = stats.average_price || stats.average || (prices.length ? Math.round(prices.reduce((a, b) => a + b, 0) / prices.length) : null);
+  const storeCount = stats.store_count || stats.storeCount || items.length;
+
+  // If there are no results and no meaningful stats, show a minimal header only
+  const hasData = items.length > 0 || (lowest != null && lowest > 0);
 
   const statItems = [
     { label: 'Lowest Price', value: formatPrice(lowest), color: 'text-cyber-green', icon: '📉' },
@@ -61,7 +64,7 @@ export default function SummaryBar({ results, query, category }) {
           </p>
         </div>
 
-        {lowest && (
+        {hasData && lowest && (
           <div className="flex items-center gap-2 bg-cyber-green/10 border border-cyber-green/20 rounded-lg px-3 py-1.5">
             <span className="text-cyber-green text-xs font-semibold font-body">💰 Best Deal</span>
             <span className="text-cyber-green font-bold font-display text-lg">{formatPrice(lowest)}</span>
@@ -69,21 +72,27 @@ export default function SummaryBar({ results, query, category }) {
         )}
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {statItems.map((stat) => (
-          <div
-            key={stat.label}
-            className="bg-surface-dark rounded-lg p-3 text-center border border-gray-800/50"
-          >
-            <div className="text-lg mb-1">{stat.icon}</div>
-            <div className={`text-xl font-bold font-display ${stat.color}`}>
-              {stat.value}
+      {/* Stats Grid — only rendered when there are actual results */}
+      {hasData ? (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {statItems.map((stat) => (
+            <div
+              key={stat.label}
+              className="bg-surface-dark rounded-lg p-3 text-center border border-gray-800/50"
+            >
+              <div className="text-lg mb-1">{stat.icon}</div>
+              <div className={`text-xl font-bold font-display ${stat.color}`}>
+                {stat.value}
+              </div>
+              <div className="text-[11px] text-gray-500 mt-1 font-body">{stat.label}</div>
             </div>
-            <div className="text-[11px] text-gray-500 mt-1 font-body">{stat.label}</div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-gray-500 text-sm text-center mt-2 font-body">
+          No matching results. Try a different search term.
+        </p>
+      )}
     </motion.div>
   );
 }
