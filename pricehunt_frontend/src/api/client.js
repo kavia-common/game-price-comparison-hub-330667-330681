@@ -2,10 +2,24 @@
  * PriceHunt API Client
  *
  * Communicates with the compare-prices backend.
- * Base URL is read from the VITE_API_URL environment variable.
+ * Base URL is resolved from environment variables in priority order:
+ *   1. VITE_API_URL     — canonical backend URL
+ *   2. VITE_BACKEND_URL — alternate backend URL variable
+ *   3. VITE_API_BASE    — alternate base URL variable
+ *   4. Fallback to http://localhost:3001
+ *
+ * The resolved URL is stripped of any trailing slash for consistent path joining.
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+// Resolve the backend API base URL from available environment variables.
+// Multiple variable names are checked because the deployment platform may
+// set different names depending on the container configuration.
+const API_BASE_URL = (
+  import.meta.env.VITE_API_URL ||
+  import.meta.env.VITE_BACKEND_URL ||
+  import.meta.env.VITE_API_BASE ||
+  'http://localhost:3001'
+).replace(/\/+$/, '');
 
 /**
  * Timeout wrapper for fetch requests.
